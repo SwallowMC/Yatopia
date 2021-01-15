@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Alex Cui <cuizhihui030925@outlook.com>
+Date: Fri, 15 Jan 2021 16:56:36 +0800
+Subject: [PATCH] Fix fixed sand duping and add config for it
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityFallingBlock.java b/src/main/java/net/minecraft/server/EntityFallingBlock.java
+index 76aac1b131f314775e418339e434f4f2da2ad619..5b89d0d6b87e2c77eefe156050507485ab3198ae 100644
+--- a/src/main/java/net/minecraft/server/EntityFallingBlock.java
++++ b/src/main/java/net/minecraft/server/EntityFallingBlock.java
+@@ -65,7 +65,9 @@ public class EntityFallingBlock extends Entity {
+     @Override
+     public void tick() {
+         // Paper start - fix sand duping
+-        if (this.dead) {
++        // Swallow start - fix fixed sand duping and add config for it
++        if (!org.swallowmc.swallow.server.SwallowConfig.allowSandDuping && this.dead) {
++        // Swallow end - fix fixed sand duping and add config for it
+             return;
+         }
+         // Paper end - fix sand duping
+@@ -92,7 +94,9 @@ public class EntityFallingBlock extends Entity {
+             this.move(EnumMoveType.SELF, this.getMot());
+ 
+             // Paper start - fix sand duping
+-            if (this.dead) {
++            // Swallow start - fix fixed sand duping
++            if (!org.swallowmc.swallow.server.SwallowConfig.allowSandDuping && this.dead) {
++            // Swallow end - fix fixed sand duping
+                 return;
+             }
+             // Paper end - fix sand duping
