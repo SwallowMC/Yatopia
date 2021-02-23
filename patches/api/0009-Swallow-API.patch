@@ -5,10 +5,10 @@ Subject: [PATCH] Swallow API
 
 
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index d6ba0895f259c15de9fb974a5c74da709158fc28..a54ba2152eb75743c8ee6c094fd2b1a0f87cd798 100644
+index 10cab1b0939d54bcd2b351c2317baf5ce5e97684..c60081368e15f6d51ba7f5fdd95ab3040a464c07 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
-@@ -1541,6 +1541,13 @@ public interface Server extends PluginMessageRecipient {
+@@ -1520,6 +1520,13 @@ public interface Server extends PluginMessageRecipient {
              throw new UnsupportedOperationException("Not supported yet.");
          }
          // Yatopia end

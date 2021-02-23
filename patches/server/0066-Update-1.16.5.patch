@@ -1,27 +1,25 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Alex Cui <cuizhihui030925@outlook.com>
-Date: Fri, 15 Jan 2021 16:45:14 +0800
-Subject: [PATCH] Swallow configuration
+Date: Fri, 15 Jan 2021 16:56:36 +0800
+Subject: [PATCH] Update 1.16.5
 
 
 diff --git a/src/main/java/co/aikar/timings/TimingsExport.java b/src/main/java/co/aikar/timings/TimingsExport.java
-index 21712a6691e00ffaf523f084da6ce5659fc98be9..3c12c829ad1a4d718aac3914090b93b527eb6e49 100644
+index 3ec187f39250214a7a72b1d7ef7b3e2ec0c09cfa..694556094d24b3eb003a6426a5b6b291b8b8900d 100644
 --- a/src/main/java/co/aikar/timings/TimingsExport.java
 +++ b/src/main/java/co/aikar/timings/TimingsExport.java
-@@ -233,8 +233,9 @@ public class TimingsExport extends Thread {
-                 pair("spigot", mapAsJSON(Bukkit.spigot().getSpigotConfig(), null)),
+@@ -234,7 +234,8 @@ public class TimingsExport extends Thread {
                  pair("paper", mapAsJSON(Bukkit.spigot().getPaperConfig(), null)),
                  pair("tuinity", mapAsJSON(Bukkit.spigot().getTuinityConfig(), null)), // Tuinity - add config to timings report
--                pair("purpur", mapAsJSON(Bukkit.spigot().getPurpurConfig(), null))
+                 pair("purpur", mapAsJSON(Bukkit.spigot().getPurpurConfig(), null))
 -                , pair("yatopia", mapAsJSON(Bukkit.spigot().getYatopiaConfig(), null)) // Yatopia - add config to timings report
-+                pair("purpur", mapAsJSON(Bukkit.spigot().getPurpurConfig(), null)),
-+                pair("yatopia", mapAsJSON(Bukkit.spigot().getYatopiaConfig(), null)), // Yatopia - add config to timings report
++                , pair("yatopia", mapAsJSON(Bukkit.spigot().getYatopiaConfig(), null)), // Yatopia - add config to timings report
 +                pair("swallow", mapAsJSON(Bukkit.spigot().getSwallowConfig(), null)) // Swallow - add config to timings report
                  // Purpur end
          ));
  
 diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
-index 2473eb88ec7be3f4935debe04eeabcc0815b3233..ffe1baf7cfabe6593086aae7510bbbf61d224736 100644
+index 2473eb88ec7be3f4935debe04eeabcc0815b3233..caae8dd6ba1804b7d5b8f4849a061daec0a5e854 100644
 --- a/src/main/java/net/minecraft/server/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/DedicatedServer.java
 @@ -189,6 +189,16 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
@@ -29,7 +27,7 @@ index 2473eb88ec7be3f4935debe04eeabcc0815b3233..ffe1baf7cfabe6593086aae7510bbbf6
          org.yatopiamc.yatopia.server.YatopiaConfig.registerCommands();
          // Yatopia end
 +
-+        // Swallow start
++        // Swallow start 
 +        try {
 +            org.swallowmc.swallow.server.SwallowConfig.init((java.io.File) options.valueOf("swallow-settings"));
 +        } catch (Exception e) {
@@ -41,39 +39,77 @@ index 2473eb88ec7be3f4935debe04eeabcc0815b3233..ffe1baf7cfabe6593086aae7510bbbf6
          de.minebench.origami.OrigamiConfig.init((java.io.File) options.valueOf("origami-settings"));
          this.setPVP(dedicatedserverproperties.pvp);
          this.setAllowFlight(dedicatedserverproperties.allowFlight);
+diff --git a/src/main/java/net/minecraft/server/EntityFallingBlock.java b/src/main/java/net/minecraft/server/EntityFallingBlock.java
+index 76aac1b131f314775e418339e434f4f2da2ad619..5b89d0d6b87e2c77eefe156050507485ab3198ae 100644
+--- a/src/main/java/net/minecraft/server/EntityFallingBlock.java
++++ b/src/main/java/net/minecraft/server/EntityFallingBlock.java
+@@ -65,7 +65,9 @@ public class EntityFallingBlock extends Entity {
+     @Override
+     public void tick() {
+         // Paper start - fix sand duping
+-        if (this.dead) {
++        // Swallow start - fix fixed sand duping and add config for it
++        if (!org.swallowmc.swallow.server.SwallowConfig.allowSandDuping && this.dead) {
++        // Swallow end - fix fixed sand duping and add config for it
+             return;
+         }
+         // Paper end - fix sand duping
+@@ -92,7 +94,9 @@ public class EntityFallingBlock extends Entity {
+             this.move(EnumMoveType.SELF, this.getMot());
+ 
+             // Paper start - fix sand duping
+-            if (this.dead) {
++            // Swallow start - fix fixed sand duping
++            if (!org.swallowmc.swallow.server.SwallowConfig.allowSandDuping && this.dead) {
++            // Swallow end - fix fixed sand duping
+                 return;
+             }
+             // Paper end - fix sand duping
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 6a0634322e4b86db2e33cef94c533dfee22e3244..b2d2a30ffadb1560fecf43b2438d2208539877d4 100644
+index fd2fe2f5e53f34957f80223e1694a57308de4016..fb771df5ac50513745c7f425fd0f89fa435e07ae 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
-@@ -188,7 +188,10 @@ public abstract class PlayerList {
+@@ -188,7 +188,8 @@ public abstract class PlayerList {
          // Spigot - view distance
          playerconnection.sendPacket(new PacketPlayOutLogin(entityplayer.getId(), entityplayer.playerInteractManager.getGameMode(), entityplayer.playerInteractManager.c(), BiomeManager.a(worldserver1.getSeed()), worlddata.isHardcore(), this.server.F(), this.s, worldserver1.getDimensionManager(), worldserver1.getDimensionKey(), this.getMaxPlayers(), worldserver1.getChunkProvider().playerChunkMap.getLoadViewDistance(), flag1, !flag, worldserver1.isDebugWorld(), worldserver1.isFlatWorld())); // Paper - no-tick view distance
          entityplayer.getBukkitEntity().sendSupportedChannels(); // CraftBukkit
-+        // Swallow start
-         playerconnection.sendPacket(new PacketPlayOutCustomPayload(PacketPlayOutCustomPayload.a, (new PacketDataSerializer(Unpooled.buffer())).a(org.yatopiamc.yatopia.server.YatopiaConfig.brandName))); // Yatopia
-+        // playerconnection.sendPacket(new PacketPlayOutCustomPayload(PacketPlayOutCustomPayload.a, (new PacketDataSerializer(Unpooled.buffer())).a(org.swallowmc.swallow.server.SwallowConfig.brandName)));
-+        // Swallow end
+-        playerconnection.sendPacket(new PacketPlayOutCustomPayload(PacketPlayOutCustomPayload.a, (new PacketDataSerializer(Unpooled.buffer())).a(org.yatopiamc.yatopia.server.YatopiaConfig.brandName))); // Yatopia
++        // playerconnection.sendPacket(new PacketPlayOutCustomPayload(PacketPlayOutCustomPayload.a, (new PacketDataSerializer(Unpooled.buffer())).a(org.yatopiamc.yatopia.server.YatopiaConfig.brandName))); // Yatopia // Swallow
++        playerconnection.sendPacket(new PacketPlayOutCustomPayload(PacketPlayOutCustomPayload.a, (new PacketDataSerializer(Unpooled.buffer())).a(org.swallowmc.swallow.server.SwallowConfig.brandName))); // Swallow
          playerconnection.sendPacket(new PacketPlayOutServerDifficulty(worlddata.getDifficulty(), worlddata.isDifficultyLocked()));
          playerconnection.sendPacket(new PacketPlayOutAbilities(entityplayer.abilities));
          playerconnection.sendPacket(new PacketPlayOutHeldItemSlot(entityplayer.inventory.itemInHandIndex));
+diff --git a/src/main/java/net/pl3x/purpur/PurpurConfig.java b/src/main/java/net/pl3x/purpur/PurpurConfig.java
+index 29ebf64a27ac34a2bfd11a904a5a30e01f766c43..e9027dd0295a75100d8cd8007015cd9e8ea4a5c0 100644
+--- a/src/main/java/net/pl3x/purpur/PurpurConfig.java
++++ b/src/main/java/net/pl3x/purpur/PurpurConfig.java
+@@ -182,7 +182,7 @@ public class PurpurConfig {
+         if (!TimingsManager.hiddenConfigs.contains("settings.seed.end-spike")) TimingsManager.hiddenConfigs.add("settings.seed.end-spike");
+     }
+ 
+-    public static String serverModName = "Yatopia";
++    public static String serverModName = "Swallow"; // Swallow
+     private static void serverModName() {
+         serverModName = getString("settings.server-mod-name", serverModName);
+     }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 201d84401114864ab2f9665bda3fe09c30cc7107..f0c299d1e31ffd5187b12eafaa311005db1c3dd2 100644
+index 7d0f73c83a7f7f3c6becf3ed4348c6b2938a86b1..f3fae73a43b11ae0936a74ddc782b80c79d3ecb9 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -232,7 +232,7 @@ import javax.annotation.Nullable; // Paper
  import javax.annotation.Nonnull; // Paper
  
  public final class CraftServer implements Server {
--    private final String serverName = "Yatopia"; // Paper // Tuinity // Yatopia
-+    private final String serverName = "Swallow"; // Paper // Tuinity // Yatopia // Swallow
+-    private final String serverName = "Yatopia"; // Paper // Tuinity // Purpur // Yatopia
++    private final String serverName = "Swallow"; // Paper // Tuinity // Purpur // Yatopia // Swallow
      private final String serverVersion;
      private final String bukkitVersion = Versioning.getBukkitVersion();
      private final Logger logger = Logger.getLogger("Minecraft");
 @@ -865,6 +865,7 @@ public final class CraftServer implements Server {
+         com.tuinity.tuinity.config.TuinityConfig.init((File) console.options.valueOf("tuinity-settings")); // Tuinity - Server Config
          net.pl3x.purpur.PurpurConfig.init((File) console.options.valueOf("purpur-settings")); // Purpur
-         de.minebench.origami.OrigamiConfig.init((File) console.options.valueOf("origami-settings")); // Origami
-         org.yatopiamc.yatopia.server.YatopiaConfig.init((File) console.options.valueOf("yatopia-settings")); // Yatopia
-+        org.swallowmc.swallow.server.SwallowConfig.init((File) console.options.valueOf("swallow-settings")); // Swallow
+         de.minebench.origami.OrigamiConfig.init((File) console.options.valueOf("origami-settings")); // Origami - Server Config
++        org.swallowmc.swallow.server.SwallowConfig.init((File) console.options.valueOf("swallow-settings")); // Swallow - Server Config
          for (WorldServer world : console.getWorlds()) {
              world.worldDataServer.setDifficulty(config.difficulty);
              world.setSpawnFlags(config.spawnMonsters, config.spawnAnimals);
@@ -85,7 +121,7 @@ index 201d84401114864ab2f9665bda3fe09c30cc7107..f0c299d1e31ffd5187b12eafaa311005
          overrideAllCommandBlockCommands = commandsConfiguration.getStringList("command-block-overrides").contains("*");
          ignoreVanillaPermissions = commandsConfiguration.getBoolean("ignore-vanilla-permissions");
  
-@@ -2327,6 +2329,13 @@ public final class CraftServer implements Server {
+@@ -2330,6 +2332,13 @@ public final class CraftServer implements Server {
          }
          // Yatopia end
  
@@ -97,10 +133,10 @@ index 201d84401114864ab2f9665bda3fe09c30cc7107..f0c299d1e31ffd5187b12eafaa311005
 +        // Swallow end
 +
          @Override
-         public void restart() {
-             org.spigotmc.RestartCommand.restart();
+         public void broadcast(BaseComponent component) {
+             for (Player player : getOnlinePlayers()) {
 diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
-index 605b7477dfce17c5d9752fd48a71098739e3f4c2..69b2853279cda0e3d03e9f68fd1ffc335d6817b1 100644
+index 756be0886856aabc31e436f82948d3d069f66fef..4128b59cc29e2167380882e69a30ed2028d6146b 100644
 --- a/src/main/java/org/bukkit/craftbukkit/Main.java
 +++ b/src/main/java/org/bukkit/craftbukkit/Main.java
 @@ -170,6 +170,14 @@ public class Main {
@@ -120,10 +156,10 @@ index 605b7477dfce17c5d9752fd48a71098739e3f4c2..69b2853279cda0e3d03e9f68fd1ffc33
                          .withRequiredArg()
 diff --git a/src/main/java/org/swallowmc/swallow/server/SwallowConfig.java b/src/main/java/org/swallowmc/swallow/server/SwallowConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..68cfe96d180a7237673be5097cac80660a414498
+index 0000000000000000000000000000000000000000..db02a92a0e5ebbfc50571e913e653b802fe9fd90
 --- /dev/null
 +++ b/src/main/java/org/swallowmc/swallow/server/SwallowConfig.java
-@@ -0,0 +1,195 @@
+@@ -0,0 +1,189 @@
 +package org.swallowmc.swallow.server;
 +
 +import com.google.common.base.Throwables;
@@ -143,7 +179,6 @@ index 0000000000000000000000000000000000000000..68cfe96d180a7237673be5097cac8066
 +import org.bukkit.command.Command;
 +import org.bukkit.configuration.InvalidConfigurationException;
 +import org.bukkit.configuration.file.YamlConfiguration;
-+
 +// Copied from YatopiaConfig.java
 +
 +public class SwallowConfig {
@@ -172,9 +207,6 @@ index 0000000000000000000000000000000000000000..68cfe96d180a7237673be5097cac8066
 +        config.options().header(HEADER);
 +        config.options().copyDefaults(true);
 +        verbose = getBoolean("verbose", false);
-+        commands = new HashMap<>();
-+        commands.put("nspt", new NSPTCommand("nspt"));
-+
 +        version = getInt("config-version", 1);
 +        set("config-version", 1);
 +        removeLeftovers();
@@ -182,9 +214,7 @@ index 0000000000000000000000000000000000000000..68cfe96d180a7237673be5097cac8066
 +    }
 +
 +    public static void registerCommands() {
-+        for (Map.Entry<String, Command> entry : commands.entrySet()) {
-+            MinecraftServer.getServer().server.getCommandMap().register(entry.getKey(), "Swallow", entry.getValue());
-+        }
++        // Swallow Delete 
 +    }
 +
 +    private static void removeLeftovers() {
@@ -319,3 +349,4 @@ index 0000000000000000000000000000000000000000..68cfe96d180a7237673be5097cac8066
 +        brandName = getString("brand-name", brandName);
 +    }
 +}
+\ No newline at end of file
