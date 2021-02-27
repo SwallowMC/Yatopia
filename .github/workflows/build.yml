@@ -82,5 +82,5 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: Yatopia-${{ matrix.java }}
-        path: yatopia-1.16.5-yatoclip.jar
+        path: swallow-1.16.5-yatoclip.jar
       
