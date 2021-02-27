@@ -19,8 +19,8 @@ toothpick {
         currentBranch = gitCmd("rev-parse", "--abbrev-ref", "HEAD").output.toString().trim()
         if(currentBranch == "HEAD") logger.warn("You are currently in \'detached HEAD\' state, branch information isn\'t available")
     }
-    forkVersion = "git-$forkName-$currentBranch-$versionTag"
-    forkUrl = "https://github.com/YatopiaMC/Yatopia"
+    forkVersion = "git-Swallow-$currentBranch-$versionTag"
+    forkUrl = "https://github.com/SwallowMC/Yatopia"
 
     minecraftVersion = "1.16.5"
     nmsPackage = "1_16_R3"
@@ -29,7 +29,7 @@ toothpick {
     upstream = "Paper"
     upstreamBranch = "origin/master"
 
-    paperclipName = "yatopia-$minecraftVersion-paperclip.jar"
+    paperclipName = "swallow-$minecraftVersion-paperclip.jar"
 
     patchCreditsOutput = "PATCHES.md"
     patchCreditsTemplate = ".template.md"
